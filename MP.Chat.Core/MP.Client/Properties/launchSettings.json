@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "MP.Client": {
+      "commandName": "Project"
+    }
+  }
+}
