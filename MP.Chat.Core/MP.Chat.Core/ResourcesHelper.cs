@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MP.Chat.Client
+namespace MP.Chat.Core
 {
     public static class ResourcesHelper
     {
@@ -13,9 +13,7 @@ namespace MP.Chat.Client
         {
             get
             {
-                var lines = File.ReadAllLines(@"Resources\Names.txt");
-
-                return lines.ToList();
+                return GetLinesFromFile(Constant.FilePaths.Names);
             }
         }
 
@@ -23,9 +21,7 @@ namespace MP.Chat.Client
         {
             get
             {
-                var lines = File.ReadAllLines(@"Resources\FinishMessages.txt");
-
-                return lines.ToList();
+                return GetLinesFromFile(Constant.FilePaths.FinishMessages);
             }
         }
 
@@ -33,9 +29,7 @@ namespace MP.Chat.Client
         {
             get
             {
-                var lines = File.ReadAllLines(@"Resources\GreetingMessages.txt");
-
-                return lines.ToList();
+                return GetLinesFromFile(Constant.FilePaths.GreetingMessages);
             }
         }
 
@@ -43,10 +37,18 @@ namespace MP.Chat.Client
         {
             get
             {
-                var lines = File.ReadAllLines(@"Resources\Storyes.txt");
-
-                return lines.ToList();
+                return GetLinesFromFile(Constant.FilePaths.Storyes);
             }
+        }
+
+        private static List<string> GetLinesFromFile(string filePath)
+        {
+            IEnumerable<string> lines = File.ReadAllLines(filePath);
+
+            lines = lines.Where(a => string.IsNullOrEmpty(a) != true);
+            lines = lines.Distinct();
+
+            return lines.ToList();
         }
     }
 }

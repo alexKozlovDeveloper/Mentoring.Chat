@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MP.Chat.Client
+namespace MP.Chat.Core
 {
     public static class RandomHelper
     {

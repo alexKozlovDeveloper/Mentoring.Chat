@@ -10,7 +10,23 @@ namespace MP.Chat.Server
     {
         static void Main(string[] args)
         {
-            var server = new PipeServer();
+            try
+            {
+                Console.WriteLine("Start.");
+                //var server = new PipeServer();
+                var server = new Server();
+                server.StartListening();
+                Console.WriteLine("End.");
+
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+
+            }
+
+           
+            Console.ReadKey();
         }
     }
 }

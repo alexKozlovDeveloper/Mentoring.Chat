@@ -6,3 +6,4 @@ What's up?
 Good morning
 Good afternoon
 Good evening
+NICE!
