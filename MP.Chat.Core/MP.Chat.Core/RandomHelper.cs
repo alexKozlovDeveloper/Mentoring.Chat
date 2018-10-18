@@ -8,6 +8,21 @@ namespace MP.Chat.Core
 {
     public static class RandomHelper
     {
+        private static Random _random;
+
+        public static Random Random
+        {
+            get
+            {
+                if (_random == null)
+                {
+                    _random = new Random();
+                }
+
+                return _random;
+            }
+        }
+               
         public static string GetRandomName()
         {
             return GetRandomString(ResourcesHelper.Names);
@@ -30,9 +45,7 @@ namespace MP.Chat.Core
 
         private static string GetRandomString(List<string> strs)
         {
-            var random = new Random();
-
-            var index = random.Next(0, strs.Count - 1);
+            var index = RandomHelper.Random.Next(0, strs.Count - 1);
 
             return strs[index];
         }

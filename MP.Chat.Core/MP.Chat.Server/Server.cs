@@ -15,12 +15,13 @@ namespace MP.Chat.Server
     public class Server
     {
 
-
-        private List<ClientHandler> ClientHandlers;
+        private MessageStore _messageStore;
+        private List<ClientHandler> _clientHandlers;
 
         public Server()
         {
-            ClientHandlers = new List<ClientHandler>();
+            _messageStore = new MessageStore();
+            _clientHandlers = new List<ClientHandler>();
         }
 
         public void StartListening()
@@ -53,7 +54,7 @@ namespace MP.Chat.Server
 
                         Console.WriteLine($"Id '{id}'");
 
-                        var clientHandler = new ClientHandler(id, chatMessage.Content);
+                        var clientHandler = new ClientHandler(id, chatMessage.Content, _messageStore);
                         clientHandler.Start();
 
                         var infoMessageToClient = new ChatMessage()

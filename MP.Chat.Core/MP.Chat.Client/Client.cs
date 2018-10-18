@@ -18,6 +18,9 @@ namespace MP.Chat.Client
 
         public string _id;
 
+        private Thread _sendMessageThread;
+        private Thread _receiveMessageThread;
+
         public Client()
         {
             Name = RandomHelper.GetRandomName();
@@ -55,9 +58,11 @@ namespace MP.Chat.Client
 
             _id = response.Content;
 
-            var thread1 = new Thread(StartChatting);
-            thread1.Start();
+            _sendMessageThread = new Thread(SendMessageFunc);
+            _sendMessageThread.Start();
 
+            _receiveMessageThread = new Thread(ReceiveMessageFunc);
+            _receiveMessageThread.Start();
 
             // Print the file to the screen.
             //Console.Write(ss.ReadString());
@@ -74,11 +79,11 @@ namespace MP.Chat.Client
 
 
 
-        public void StartChatting()
+        public void SendMessageFunc()
         {
             var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesFromUserPipeName(_id), PipeDirection.Out, PipeOptions.None, TokenImpersonationLevel.Impersonation);
 
-            Console.WriteLine("Connecting to server...\n");
+            Console.WriteLine("Connecting to GetMessagesFromUserPipeName...\n");
             pipeClient.Connect();
 
             StreamString ss = new StreamString(pipeClient);
@@ -96,7 +101,29 @@ namespace MP.Chat.Client
 
                 ss.WriteString(messegeStr);
 
-                Thread.Sleep(1000);
+                Thread.Sleep(100000);
+            }
+        }
+
+        public void ReceiveMessageFunc()
+        {
+            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesToUserPipeName(_id), PipeDirection.In, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+
+            Console.WriteLine("Connecting to GetMessagesToUserPipeName...\n");
+            pipeClient.Connect();
+            Console.WriteLine("Connected");
+            StreamString ss = new StreamString(pipeClient);
+
+
+
+            while (true)
+            {
+
+                Console.WriteLine("Reading message...");
+                var messegeStr = ss.ReadString();
+                var messege = JsonConvert.DeserializeObject<ChatMessage>(messegeStr);
+
+                Console.WriteLine(messege.Content);
             }
         }
 

@@ -26,6 +26,11 @@ namespace MP.Chat.Client
             Console.WriteLine("Start Bot Chatting...");
             botCreator.StartBotChatting();
 
+            var botCreator2 = new BotCreator();
+
+            Console.WriteLine("Start Bot2 Chatting...");
+            botCreator2.StartBotChatting();
+
             while (true)
             {
                 Console.WriteLine("Press 'Esc' for exit...");
