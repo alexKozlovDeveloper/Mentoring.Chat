@@ -10,6 +10,7 @@ namespace MP.Chat.Core.Protocol
     {
         Message,
         RegisterUser,
-        RegisterApproved
+        RegisterApproved,
+        GetMessagesStory
     }
 }

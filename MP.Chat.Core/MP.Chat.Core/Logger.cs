@@ -38,6 +38,7 @@ namespace MP.Chat.Core
             lock(_lock)
             {
                 var str = $"{DateTime.Now.ToString("hh:mm:ss.ffff")} {message}{Environment.NewLine}";
+                Console.WriteLine(str);
                 File.AppendAllText(_filePath, str);
             }            
         }

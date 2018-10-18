@@ -33,7 +33,7 @@ namespace MP.Chat.Client
             Console.WriteLine("Connecting to server...\n");
             pipeClient.Connect();
 
-            StreamString ss = new StreamString(pipeClient);
+            StreamController ss = new StreamController(pipeClient);
             // Validate the server's signature string
             //if (ss.ReadString() == "I am the one true server!")
             //{
@@ -44,15 +44,12 @@ namespace MP.Chat.Client
             var messege = new ChatMessage()
             {
                 Command = ChatCommand.RegisterUser,
-                Content = Name
+                Name = Name
             };
 
-            var messegeStr = JsonConvert.SerializeObject(messege);
+            ss.SendMessage(messege);
 
-            ss.WriteString(messegeStr);
-
-            var responseStr = ss.ReadString();
-            var response = JsonConvert.DeserializeObject<ChatMessage>(responseStr);
+            var response = ss.ReceiveMessage();
 
             pipeClient.Close();
 
@@ -86,7 +83,7 @@ namespace MP.Chat.Client
             Console.WriteLine("Connecting to GetMessagesFromUserPipeName...\n");
             pipeClient.Connect();
 
-            StreamString ss = new StreamString(pipeClient);
+            StreamController ss = new StreamController(pipeClient);
 
             
 
@@ -97,9 +94,8 @@ namespace MP.Chat.Client
                     Command = ChatCommand.Message,
                     Content = RandomHelper.GetRandomStoryes()
                 };
-                var messegeStr = JsonConvert.SerializeObject(messege);
 
-                ss.WriteString(messegeStr);
+                ss.SendMessage(messege);
 
                 Thread.Sleep(100000);
             }
@@ -112,7 +108,7 @@ namespace MP.Chat.Client
             Console.WriteLine("Connecting to GetMessagesToUserPipeName...\n");
             pipeClient.Connect();
             Console.WriteLine("Connected");
-            StreamString ss = new StreamString(pipeClient);
+            StreamController ss = new StreamController(pipeClient);
 
 
 
@@ -120,8 +116,7 @@ namespace MP.Chat.Client
             {
 
                 Console.WriteLine("Reading message...");
-                var messegeStr = ss.ReadString();
-                var messege = JsonConvert.DeserializeObject<ChatMessage>(messegeStr);
+                var messege = ss.ReceiveMessage();
 
                 Console.WriteLine(messege.Content);
             }

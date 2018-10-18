@@ -37,66 +37,64 @@ namespace MP.Chat.Server
             _store.NewMessage += Store_NewMessage;
         }
 
-        private void Store_NewMessage(string message)
+        private void Store_NewMessage(ChatMessage message)
         {
-            Console.WriteLine(message);
-            StreamString ss = new StreamString(_messagesToUserPipe);
+            _logger.Info($"[{ClientName}] New message received '{message}'");
 
-            var infoMessageToClient = new ChatMessage()
+            if(message.Name == ClientName)
             {
-                Content = message
-            };
+                _logger.Info($"[{ClientName}] It is client's message, send message to client is not need");
+                return;
+            }
 
-            //Console.WriteLine("Sending id to client");
+            _logger.Info($"[{ClientName}] Sending message to clien...");
+            StreamController streamController = new StreamController(_messagesToUserPipe);
 
-            var infoMessageToClientstr = JsonConvert.SerializeObject(infoMessageToClient);
-
-            ss.WriteString(infoMessageToClientstr);
+            streamController.SendMessage(message);
         }
 
         public void Start()
         {
+            _logger.Info($"[{ClientName}] Strting MessagesFromUser thread");
             _messagesFromUserThread = new Thread(MessagesFromUserThreadFunc);
             _messagesFromUserThread.Start();
 
+            _logger.Info($"[{ClientName}] Strting MessagesToUser thread");
             _messagesToUserThread = new Thread(MessagesToUserThreadFunc);
             _messagesToUserThread.Start();
         }
 
         public void MessagesFromUserThreadFunc()
         {
-            Console.WriteLine("Creating messagesFromUserPipe pipe.");
+            _logger.Info($"[{ClientName}] Initializing messagesFromUser pipe...");
             _messagesFromUserPipe = new NamedPipeServerStream(PipeNameHelper.GetMessagesFromUserPipeName(Id), PipeDirection.In);
 
-            // Wait for a client to connect
-            Console.WriteLine("Waiting For Connection to messagesFromUserPipe");
+            _logger.Info($"[{ClientName}] Waiting for connection to messagesFromUser pipe...");
             _messagesFromUserPipe.WaitForConnection();
-            Console.WriteLine("_messagesFromUserPipe Connected");
+            _logger.Info($"[{ClientName}] Client connected to messagesFromUser pipe...");
 
             while (true)
             {
-                StreamString ss = new StreamString(_messagesFromUserPipe);
+                StreamController streamController = new StreamController(_messagesFromUserPipe);
 
-                Console.WriteLine("Reading message");
-                //ss.WriteString("I am the one true server!");
-                var chatMessageStr = ss.ReadString();
-                var chatMessage = JsonConvert.DeserializeObject<ChatMessage>(chatMessageStr);
+                _logger.Info($"[{ClientName}] Waiting message from client...");
+                var chatMessage = streamController.ReceiveMessage();
 
-                //Console.WriteLine($"{ClientName}: {chatMessage.Content}");
+                _logger.Info($"[{ClientName}] Message from client '{chatMessage}' received");
+                _logger.Info($"[{ClientName}] Add message to store");
 
-                _store.AddNewMessage($"{ClientName}: {chatMessage.Content}");
+                _store.AddNewMessage(chatMessage);
             }
         }
 
         public void MessagesToUserThreadFunc()
         {
-            Console.WriteLine("Creating messagesToUserPipe pipe.");
+            _logger.Info($"[{ClientName}] Initializing messagesToUser pipe...");
             _messagesToUserPipe = new NamedPipeServerStream(PipeNameHelper.GetMessagesToUserPipeName(Id), PipeDirection.Out);
 
-            // Wait for a client to connect
-            Console.WriteLine("Waiting For Connection to messagesToUserPipe");
+            _logger.Info($"[{ClientName}] Waiting for connection to messagesToUser pipe...");
             _messagesToUserPipe.WaitForConnection();
-            Console.WriteLine("_messagesToUserPipe Connected");
+            _logger.Info($"[{ClientName}] Client connected to messagesToUser pipe...");
         }
     }
 }

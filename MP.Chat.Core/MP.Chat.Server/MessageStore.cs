@@ -1,4 +1,5 @@
 ﻿using MP.Chat.Core;
+using MP.Chat.Core.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace MP.Chat.Server
 {
     public class MessageStore
     {
-        public List<string> Messages { get; private set; }
+        public List<ChatMessage> Messages { get; private set; }
 
-        public delegate void NewMessageDelegate(string message);
+        public delegate void NewMessageDelegate(ChatMessage message);
         public event NewMessageDelegate NewMessage;
 
         private Logger _logger;
@@ -20,15 +21,14 @@ namespace MP.Chat.Server
         {
             _logger = logger;
 
-            Messages = new List<string>();
+            Messages = new List<ChatMessage>();
         }
 
-        public void AddNewMessage(string message)
+        public void AddNewMessage(ChatMessage message)
         {
             Messages.Add(message);
 
             NewMessage(message);
         }
-
     }
 }

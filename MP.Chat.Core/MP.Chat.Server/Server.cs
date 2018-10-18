@@ -14,8 +14,8 @@ namespace MP.Chat.Server
 {
     public class Server
     {
-        private MessageStore _messageStore;
-        private List<ClientHandler> _clientHandlers;
+        private readonly MessageStore _messageStore;
+        private readonly List<ClientHandler> _clientHandlers;
 
         private Logger _logger;
 
@@ -30,7 +30,7 @@ namespace MP.Chat.Server
         public void StartListening()
         {
             _logger.Info("Creating listening pipe...");
-            NamedPipeServerStream pipeServer = new NamedPipeServerStream(Constant.ServerListeningPipeName, PipeDirection.InOut, 1);
+            NamedPipeServerStream pipeServer = new NamedPipeServerStream(Constant.ServerListeningPipeName, PipeDirection.InOut);
 
             while (true)
             {
@@ -106,9 +106,6 @@ namespace MP.Chat.Server
             }
         }
 
-        public void ClientThreadFunc()
-        {
-
-        }
+     
     }
 }

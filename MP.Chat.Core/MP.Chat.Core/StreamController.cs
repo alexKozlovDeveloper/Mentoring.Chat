@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MP.Chat.Core.Protocol;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace MP.Chat.Core
             streamEncoding = new UnicodeEncoding();
         }
 
-        public string ReadString()
+        public ChatMessage ReceiveMessage()
         {
             int len = 0;
 
@@ -27,12 +29,18 @@ namespace MP.Chat.Core
             byte[] inBuffer = new byte[len];
             ioStream.Read(inBuffer, 0, len);
 
-            return streamEncoding.GetString(inBuffer);
+            var str = streamEncoding.GetString(inBuffer);
+
+            var message = JsonConvert.DeserializeObject<ChatMessage>(str);
+
+            return message;
         }
 
-        public void WriteString(string outString)
+        public void SendMessage(ChatMessage message)
         {
-            byte[] outBuffer = streamEncoding.GetBytes(outString);
+            var str = JsonConvert.SerializeObject(message);
+
+            byte[] outBuffer = streamEncoding.GetBytes(str);
             int len = outBuffer.Length;
             if (len > UInt16.MaxValue)
             {
@@ -42,8 +50,6 @@ namespace MP.Chat.Core
             ioStream.WriteByte((byte)(len & 255));
             ioStream.Write(outBuffer, 0, len);
             ioStream.Flush();
-
-            //return outBuffer.Length + 2;
         }
     }
 }
