@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MP.Chat.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,9 +13,11 @@ namespace MP.Chat.Client
         private Thread _botCreatorThread;
         private bool _isThreadActive;
 
-        public BotCreator()
-        {
+        private Logger _logger;
 
+        public BotCreator(Logger logger)
+        {
+            _logger = logger;
         }
 
         public void StartBotChatting()
@@ -30,7 +33,7 @@ namespace MP.Chat.Client
         {
             while (_isThreadActive)
             {
-                var client = new Client();
+                var client = new Client(_logger);
 
                 client.ConnectToServer();
 

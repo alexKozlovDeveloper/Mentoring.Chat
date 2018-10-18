@@ -1,4 +1,5 @@
-﻿using MP.Chat.Core.Protocol;
+﻿using MP.Chat.Core;
+using MP.Chat.Core.Protocol;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,28 +13,23 @@ namespace MP.Chat.Client
     {
         static void Main(string[] args)
         {
-            var d = JsonConvert.SerializeObject(new ChatMessage
-            {
-                Command = ChatCommand.RegisterUser,
-                Content = "ololo"
-            });
-            var c = JsonConvert.DeserializeObject<ChatMessage>(d);
+            var logger = new Logger(@"log.txt");
+            logger.Info("Start.");
 
-            Console.WriteLine("Star.");
+            logger.Info("Creating bot...");
+            var botCreator = new BotCreator(logger);
 
-            var botCreator = new BotCreator();
-
-            Console.WriteLine("Start Bot Chatting...");
+            logger.Info("Start Bot Chatting...");
             botCreator.StartBotChatting();
 
-            var botCreator2 = new BotCreator();
+            //var botCreator2 = new BotCreator();
 
-            Console.WriteLine("Start Bot2 Chatting...");
-            botCreator2.StartBotChatting();
+            //Console.WriteLine("Start Bot2 Chatting...");
+            //botCreator2.StartBotChatting();
 
             while (true)
             {
-                Console.WriteLine("Press 'Esc' for exit...");
+                logger.Info("Press 'Esc' for exit...");
                 var key = Console.ReadKey();
 
                 if (key.Key == ConsoleKey.Escape)
@@ -43,7 +39,8 @@ namespace MP.Chat.Client
                 }
             }
 
-            Console.WriteLine("End.");
+            logger.Info("End.");
+            Console.ReadKey();
         }
     }
 }

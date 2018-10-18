@@ -21,9 +21,13 @@ namespace MP.Chat.Client
         private Thread _sendMessageThread;
         private Thread _receiveMessageThread;
 
-        public Client()
+        private Logger _logger;
+
+        public Client(Logger logger)
         {
-            Name = RandomHelper.GetRandomName();
+            _logger = logger;
+
+            Name = RandomHelper.GetRandomName();            
         }
 
         public void ConnectToServer()
