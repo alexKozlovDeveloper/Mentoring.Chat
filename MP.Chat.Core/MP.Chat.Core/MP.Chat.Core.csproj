@@ -42,12 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constant.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="PipeNameHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\ChatCommand.cs" />
     <Compile Include="Protocol\ChatMessage.cs" />
     <Compile Include="RandomHelper.cs" />
     <Compile Include="ResourcesHelper.cs" />
+    <Compile Include="StreamController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\FinishMessages.txt">

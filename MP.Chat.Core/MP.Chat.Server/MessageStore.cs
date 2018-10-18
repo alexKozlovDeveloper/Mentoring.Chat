@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MP.Chat.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +14,12 @@ namespace MP.Chat.Server
         public delegate void NewMessageDelegate(string message);
         public event NewMessageDelegate NewMessage;
 
+        private Logger _logger;
 
-        public MessageStore()
+        public MessageStore(Logger logger)
         {
+            _logger = logger;
+
             Messages = new List<string>();
         }
 

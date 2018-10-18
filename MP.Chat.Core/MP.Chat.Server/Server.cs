@@ -14,19 +14,22 @@ namespace MP.Chat.Server
 {
     public class Server
     {
-
         private MessageStore _messageStore;
         private List<ClientHandler> _clientHandlers;
 
-        public Server()
+        private Logger _logger;
+
+        public Server(Logger logger)
         {
-            _messageStore = new MessageStore();
-            _clientHandlers = new List<ClientHandler>();
+            _logger = logger;
+
+            _messageStore = new MessageStore(_logger);
+            _clientHandlers = new List<ClientHandler>();            
         }
 
         public void StartListening()
         {
-            Console.WriteLine("Creating listening pipe.");
+            _logger.Info("Creating listening pipe.");
             NamedPipeServerStream pipeServer = new NamedPipeServerStream(Constant.ServerListeningPipeName, PipeDirection.InOut, 1);
 
             while (true)
@@ -49,12 +52,11 @@ namespace MP.Chat.Server
                     if(chatMessage.Command == ChatCommand.RegisterUser)
                     {
                         Console.WriteLine("RegisterUser command");
-                        var rnd = new Random();
-                        var id = rnd.Next(0,1000).ToString();
+                        var id = RandomHelper.Random.Next(0, 1000).ToString();
 
                         Console.WriteLine($"Id '{id}'");
 
-                        var clientHandler = new ClientHandler(id, chatMessage.Content, _messageStore);
+                        var clientHandler = new ClientHandler(_logger, id, chatMessage.Content, _messageStore);
                         clientHandler.Start();
 
                         var infoMessageToClient = new ChatMessage()

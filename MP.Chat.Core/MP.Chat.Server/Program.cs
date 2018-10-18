@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MP.Chat.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,22 +11,20 @@ namespace MP.Chat.Server
     {
         static void Main(string[] args)
         {
-            try
-            {
-                Console.WriteLine("Start.");
-                //var server = new PipeServer();
-                var server = new Server();
-                server.StartListening();
-                Console.WriteLine("End.");
+            var logger = new Logger(@"log.txt");
+            logger.Info("Start.");
 
+            try
+            {            
+                var server = new Server(logger);
+                server.StartListening();
             }
             catch (Exception ex) 
             {
-                Console.WriteLine(ex.Message);
-
+                logger.Error(ex);
             }
 
-           
+            logger.Info("End.");
             Console.ReadKey();
         }
     }

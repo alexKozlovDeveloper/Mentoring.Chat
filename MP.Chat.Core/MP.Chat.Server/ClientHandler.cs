@@ -24,8 +24,12 @@ namespace MP.Chat.Server
         private NamedPipeServerStream _messagesFromUserPipe;
         private NamedPipeServerStream _messagesToUserPipe;
 
-        public ClientHandler(string id, string clientName, MessageStore store)
+        private Logger _logger;
+
+        public ClientHandler(Logger logger,string id, string clientName, MessageStore store)
         {
+            _logger = logger;
+
             Id = id;
             ClientName = clientName;
 
