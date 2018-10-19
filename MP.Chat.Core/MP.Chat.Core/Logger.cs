@@ -13,9 +13,12 @@ namespace MP.Chat.Core
 
         private string _lock = "lock";
 
-        public Logger(string filePath)
+        private bool _writeToConsole;
+
+        public Logger(string filePath, bool writeToConsole = true)
         {
             _filePath = filePath;
+            _writeToConsole = writeToConsole;
         }
 
         public void Info(string message)
@@ -37,8 +40,15 @@ namespace MP.Chat.Core
         {
             lock(_lock)
             {
-                var str = $"{DateTime.Now.ToString("hh:mm:ss.ffff")} {message}{Environment.NewLine}";
-                Console.WriteLine(str);
+                var str = $"{DateTime.Now.ToString("hh:mm:ss.ffff")} {message}";
+
+                if(_writeToConsole == true)
+                {
+                    Console.WriteLine(str);
+                }
+
+                str += Environment.NewLine;
+
                 File.AppendAllText(_filePath, str);
             }            
         }

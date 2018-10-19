@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleViewer.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PipeNameHelper.cs" />

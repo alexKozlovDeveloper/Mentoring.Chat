@@ -73,6 +73,12 @@ namespace MP.Chat.Server
                         streamController.SendMessage(infoMessageToClient);
                         _logger.Info($"[{chatMessage.Name}|{id}] Disconnecting...");
 
+                        _messageStore.AddNewMessage(new ChatMessage
+                        {
+                            Name = "Server",
+                            Content = $"A new user '{chatMessage.Name}' was connected."
+                        });
+
                         pipeServer.Disconnect();
                     }
 

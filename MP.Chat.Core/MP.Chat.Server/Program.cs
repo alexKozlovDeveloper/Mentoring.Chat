@@ -11,7 +11,7 @@ namespace MP.Chat.Server
     {
         static void Main(string[] args)
         {
-            var logger = new Logger(@"log.txt");
+            var logger = new Logger(@"log.txt", true);
             logger.Info("Start.");
 
             try

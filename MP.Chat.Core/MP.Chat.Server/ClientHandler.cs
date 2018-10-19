@@ -26,9 +26,13 @@ namespace MP.Chat.Server
 
         private Logger _logger;
 
+        private ConsoleViewer _consoleViewer;
+
         public ClientHandler(Logger logger,string id, string clientName, MessageStore store)
         {
             _logger = logger;
+
+            _consoleViewer = new ConsoleViewer(_logger);
 
             Id = id;
             ClientName = clientName;
@@ -51,15 +55,17 @@ namespace MP.Chat.Server
             StreamController streamController = new StreamController(_messagesToUserPipe);
 
             streamController.SendMessage(message);
+
+            _consoleViewer.WriteMessageToConsole(message);
         }
 
         public void Start()
         {
-            _logger.Info($"[{ClientName}] Strting MessagesFromUser thread");
+            _logger.Info($"[{ClientName}] Starting MessagesFromUser thread");
             _messagesFromUserThread = new Thread(MessagesFromUserThreadFunc);
             _messagesFromUserThread.Start();
 
-            _logger.Info($"[{ClientName}] Strting MessagesToUser thread");
+            _logger.Info($"[{ClientName}] Starting MessagesToUser thread");
             _messagesToUserThread = new Thread(MessagesToUserThreadFunc);
             _messagesToUserThread.Start();
         }

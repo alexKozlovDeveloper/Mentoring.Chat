@@ -96,7 +96,9 @@ namespace MP.Chat.Client
                 var messege = new ChatMessage()
                 {
                     Command = ChatCommand.Message,
-                    Content = RandomHelper.GetRandomStoryes()
+                    Content = RandomHelper.GetRandomStoryes(),
+                    Name = Name,
+                    Id = _id
                 };
 
                 ss.SendMessage(messege);
