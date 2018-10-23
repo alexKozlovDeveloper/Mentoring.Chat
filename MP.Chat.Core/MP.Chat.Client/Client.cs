@@ -23,27 +23,28 @@ namespace MP.Chat.Client
 
         private Logger _logger;
 
+        private ConsoleViewer _consoleViewer;
+
         public Client(Logger logger)
         {
             _logger = logger;
 
-            Name = RandomHelper.GetRandomName();            
+            _consoleViewer = new ConsoleViewer(logger);
+
+            Name = RandomHelper.GetRandomName();
+            _logger.Info($"Name '{Name}' generated");
         }
 
         public void ConnectToServer()
         {
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName, PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+            _logger.Info("Creating pipe for init user on server...");
+            var pipeClient = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName, 
+                PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
 
-            Console.WriteLine("Connecting to server...\n");
+            _logger.Info("Connecting to server...");
             pipeClient.Connect();
 
-            StreamController ss = new StreamController(pipeClient);
-            // Validate the server's signature string
-            //if (ss.ReadString() == "I am the one true server!")
-            //{
-            //The client security token is sent with the first write.
-            // Send the name of the file whose contents are returned
-            // by the server.
+            StreamController streamController = new StreamController(pipeClient);
 
             var messege = new ChatMessage()
             {
@@ -51,45 +52,43 @@ namespace MP.Chat.Client
                 Name = Name
             };
 
-            ss.SendMessage(messege);
+            _logger.Info("Sending registering message");
+            streamController.SendMessage(messege);
 
-            var response = ss.ReceiveMessage();
+            var response = streamController.ReceiveMessage();
+
+            if(response.Command == ChatCommand.RegisterApproved)
+            {
+                _logger.Info("Register approved");
+            }
 
             pipeClient.Close();
 
             _id = response.Content;
+            _logger.Info($"Client Id '{_id}'");
 
+            _logger.Info($"Creating threads for Send/Receive funcs...");
+            _logger.Info($"Starting SendMessageFunc");
             _sendMessageThread = new Thread(SendMessageFunc);
             _sendMessageThread.Start();
 
+            _logger.Info($"Starting ReceiveMessageFunc");
             _receiveMessageThread = new Thread(ReceiveMessageFunc);
             _receiveMessageThread.Start();
 
-            // Print the file to the screen.
-            //Console.Write(ss.ReadString());
-            //}
-            //else
-            //{
-            // Console.WriteLine("Server could not be verified.");
-            //}
-            Thread.Sleep(4000000);
-
-            // Give the client process some time to display results before exiting.
-
         }
-
-
 
         public void SendMessageFunc()
         {
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesFromUserPipeName(_id), PipeDirection.Out, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+            _logger.Info($"SendMessageFunc start.");
+            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesFromUserPipeName(_id), 
+                PipeDirection.Out, PipeOptions.None, TokenImpersonationLevel.Impersonation);
 
-            Console.WriteLine("Connecting to GetMessagesFromUserPipeName...\n");
+            _logger.Info("Connecting to GetMessagesFromUserPipeName...");
             pipeClient.Connect();
-
-            StreamController ss = new StreamController(pipeClient);
-
+            _logger.Info("Connected");
             
+            StreamController streamController = new StreamController(pipeClient);
 
             while (true)
             {
@@ -101,31 +100,42 @@ namespace MP.Chat.Client
                     Id = _id
                 };
 
-                ss.SendMessage(messege);
+                _logger.Info("Sending random story to server");
 
+                streamController.SendMessage(messege);
+
+                _logger.Info("Sleeping...");
                 Thread.Sleep(100000);
+                //Thread.Sleep(RandomHelper.GetRandomSleepTime());
             }
+
+            _logger.Info($"SendMessageFunc end.");
         }
 
         public void ReceiveMessageFunc()
         {
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesToUserPipeName(_id), PipeDirection.In, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+            _logger.Info($"ReceiveMessageFunc start.");
 
-            Console.WriteLine("Connecting to GetMessagesToUserPipeName...\n");
+            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesToUserPipeName(_id), 
+                PipeDirection.In, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+
+            _logger.Info("Connecting to server...");
             pipeClient.Connect();
-            Console.WriteLine("Connected");
-            StreamController ss = new StreamController(pipeClient);
+            _logger.Info("Connected");
 
-
+            StreamController streamController = new StreamController(pipeClient);
 
             while (true)
             {
+                _logger.Info("Waiting message from server...");
+                var messege = streamController.ReceiveMessage();
 
-                Console.WriteLine("Reading message...");
-                var messege = ss.ReceiveMessage();
+                _logger.Info("Message received...");
 
-                Console.WriteLine(messege.Content);
+                _logger.Info(messege.Content);
             }
+
+            _logger.Info($"ReceiveMessageFunc end.");
         }
 
         public void StopChatting()

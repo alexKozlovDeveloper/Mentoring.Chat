@@ -43,6 +43,13 @@ namespace MP.Chat.Core
             return GetRandomString(ResourcesHelper.Storyes);
         }
 
+        public static int GetRandomSleepTime()
+        {
+            var time = RandomHelper.Random.Next(2, 12) * 1000;
+
+            return time;
+        }
+
         private static string GetRandomString(List<string> strs)
         {
             var index = RandomHelper.Random.Next(0, strs.Count - 1);
