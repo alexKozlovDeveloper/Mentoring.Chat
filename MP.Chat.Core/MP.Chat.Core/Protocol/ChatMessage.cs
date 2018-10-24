@@ -15,6 +15,18 @@ namespace MP.Chat.Core.Protocol
         public string Content { get; set; }
         public string Date { get; set; }
 
+        public ChatMessage()
+        {
+            Date = DateTime.Now.ToString("hh:mm:ss");
+        }
+
+        public ChatMessage(string name, string message)
+        {
+            Name = name;
+            Content = message;
+            Date = DateTime.Now.ToString("hh:mm:ss");
+        }
+
         public override string ToString()
         {
             return $"{Date} [{Name}]: {Content}";

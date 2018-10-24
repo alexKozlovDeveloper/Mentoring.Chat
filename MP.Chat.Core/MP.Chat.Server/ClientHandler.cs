@@ -16,7 +16,7 @@ namespace MP.Chat.Server
         public string Id { get; private set; }
         public string ClientName { get; private set; }
 
-        private bool _isAlive;
+        public bool IsAlive { get; private set; }
 
         private MessageStore _store;
 
@@ -28,13 +28,9 @@ namespace MP.Chat.Server
 
         private Logger _logger;
 
-        private ConsoleViewer _consoleViewer;
-
         public ClientHandler(Logger logger,string id, string clientName, MessageStore store)
         {
             _logger = logger;
-
-            _consoleViewer = new ConsoleViewer(_logger);
 
             Id = id;
             ClientName = clientName;
@@ -42,32 +38,24 @@ namespace MP.Chat.Server
             _store = store;
             _store.NewMessage += Store_NewMessage;
 
-            _isAlive = true;
+            IsAlive = true;
         }
 
         private void Store_NewMessage(ChatMessage message)
         {
             _logger.Info($"[{ClientName}] New message received '{message}'");
 
-            //if(message.Name == ClientName)
-            //{
-            //    _logger.Info($"[{ClientName}] It is client's message, send message to client is not need");
-            //    return;
-            //}
-
             try
             {
                 _logger.Info($"[{ClientName}] Sending message to clien...");
                 StreamController streamController = new StreamController(_messagesToUserPipe);
 
-                streamController.SendMessage(message);
-
-                _consoleViewer.WriteMessageToConsole(message);
+                streamController.SendMessage(message);                
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
-                _isAlive = false;
+                _logger.Error($"[{ClientName}] {ex.Message}");
+                IsAlive = false;
             }
         }
 
@@ -84,7 +72,8 @@ namespace MP.Chat.Server
 
         public void Stop()
         {
-            _isAlive = false;
+            _store.NewMessage -= Store_NewMessage;
+            IsAlive = false;
         }
 
         public void MessagesFromUserThreadFunc()
@@ -98,7 +87,7 @@ namespace MP.Chat.Server
 
             try
             {
-                while (_isAlive)
+                while (IsAlive)
                 {
                     StreamController streamController = new StreamController(_messagesFromUserPipe);
 
@@ -113,8 +102,8 @@ namespace MP.Chat.Server
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
-                _isAlive = false;
+                _logger.Error($"[{ClientName}] {ex.Message}");
+                IsAlive = false;
             }           
         }
 

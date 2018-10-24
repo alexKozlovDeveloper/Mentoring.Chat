@@ -1,4 +1,5 @@
 ﻿using MP.Chat.Core;
+using MP.Chat.Core.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,13 @@ namespace MP.Chat.Client
 
         private Logger _logger;
 
+        private ConsoleViewer _consoleViewer;
+
         public BotCreator(Logger logger)
         {
             _logger = logger;
+
+            _consoleViewer = new ConsoleViewer(logger);
         }
 
         public void StartBot()
@@ -33,17 +38,49 @@ namespace MP.Chat.Client
         {
             while (_isThreadActive)
             {
-                _logger.Info("Creating new client...");
-                var client = new Client(_logger);
+                try
+                {
+                    Console.Clear();
 
-                _logger.Info("Starting client...");
-                client.Login();
+                    var name = RandomHelper.GetRandomName();
 
-                Sleep(RandomHelper.GetRandomSleepTime());
+                    _logger.Info($"Creating new client '{name}'...");
+                    var client = new Client(_logger, name);
 
-                _logger.Info("Stopping client...");
-                client.Stop();
+                    client.NewMessage += Client_NewMessage;
+
+                    _logger.Info("Starting client...");
+                    client.Login();
+                    client.Start();
+
+                    client.SendMessage(RandomHelper.GetRandomGreetingMessages());
+                    Sleep(RandomHelper.GetRandomSleepTime());
+
+                    var count = RandomHelper.Random.Next(10, 50);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        Sleep(RandomHelper.GetRandomSleepTime());
+                        client.SendMessage(RandomHelper.GetRandomStoryes());
+                    }
+
+                    Sleep(RandomHelper.GetRandomSleepTime());
+                    client.SendMessage(RandomHelper.GetRandomFinishMessages());
+
+                    Sleep(RandomHelper.GetRandomSleepTime());
+                    _logger.Info("Stopping client...");
+                    client.Stop();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
             }
+        }
+
+        private void Client_NewMessage(ChatMessage message)
+        {
+            _consoleViewer.WriteMessageToConsole(message);
         }
 
         private void Sleep(int time)

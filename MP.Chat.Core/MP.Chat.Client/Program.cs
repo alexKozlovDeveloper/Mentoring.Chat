@@ -13,7 +13,7 @@ namespace MP.Chat.Client
     {
         static void Main(string[] args)
         {
-            var logger = new Logger(@"log.txt");
+            var logger = new Logger(@"log.txt", false);
             logger.Info("Start.");
 
             logger.Info("Creating bot...");
@@ -27,7 +27,8 @@ namespace MP.Chat.Client
                 logger.Info("Press 'Esc' for exit...");
                 var key = Console.ReadKey();
 
-                if (key.Key == ConsoleKey.Escape)
+                //if (key.Key == ConsoleKey.Escape)
+                if (key.Key == ConsoleKey.A)
                 {
                     botCreator.StopBot();
                     break;

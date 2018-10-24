@@ -17,22 +17,32 @@ namespace MP.Chat.Server
 
         private Logger _logger;
 
-        private string _lock = "MessageStoreLock";
+        private object locker = new object();
+
+        private ConsoleViewer _consoleViewer;
 
         public MessageStore(Logger logger)
         {
             _logger = logger;
 
             Messages = new List<ChatMessage>();
+
+            _consoleViewer = new ConsoleViewer(logger);
         }
 
         public void AddNewMessage(ChatMessage message)
         {
-            lock (_lock)
+            lock (locker)
             {
                 Messages.Add(message);
-                NewMessage(message);
-            }           
+
+                if(NewMessage != null)
+                {
+                    NewMessage(message);
+                }                
+            }
+
+            _consoleViewer.WriteMessageToConsole(message);
         }
     }
 }

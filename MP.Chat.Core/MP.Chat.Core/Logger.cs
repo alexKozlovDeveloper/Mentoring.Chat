@@ -33,7 +33,13 @@ namespace MP.Chat.Core
 
         public void Error(Exception ex)
         {
-            LogToFile($"ERROR! '{ex.Message}'");
+            var oldColor = Console.ForegroundColor;
+
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            Error(ex.Message);
+
+            Console.ForegroundColor = oldColor;      
         }
 
         private void LogToFile(string message)

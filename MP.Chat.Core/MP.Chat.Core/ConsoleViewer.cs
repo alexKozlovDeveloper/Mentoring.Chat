@@ -18,14 +18,20 @@ namespace MP.Chat.Core
 
         public void WriteMessageToConsole(ChatMessage message, ConsoleColor color)
         {
+            var str = GetStringMessage(message);
+                        
+            _logger.Info(str);
+
+            WriteMessageWithColor(str, color);
+        }
+
+        public static void WriteMessageWithColor(string message, ConsoleColor color)
+        {
             var oldColor = Console.ForegroundColor;
 
             Console.ForegroundColor = color;
 
-            var str = GetStringMessage(message);
-
-            Console.WriteLine();
-            _logger.Info(str);
+            Console.WriteLine(message);
 
             Console.ForegroundColor = oldColor;
         }
