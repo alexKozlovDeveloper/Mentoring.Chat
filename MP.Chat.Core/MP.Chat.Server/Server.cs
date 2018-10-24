@@ -48,7 +48,7 @@ namespace MP.Chat.Server
 
                     _logger.Info($"User name '{chatMessage.Name}'");
 
-                    if (chatMessage.Command == ChatCommand.RegisterUser)
+                    if (chatMessage.Command == ChatCommand.Login)
                     {
                         _logger.Info($"[{chatMessage.Name}] 'RegisterUser' command received");
                         _logger.Info($"[{chatMessage.Name}] Creating user id...");
@@ -62,11 +62,12 @@ namespace MP.Chat.Server
                         _logger.Info($"[{chatMessage.Name}|{id}] Starting client handler...");
                         clientHandler.Start();
 
+                        _clientHandlers.Add(clientHandler);
+
                         _logger.Info($"[{chatMessage.Name}|{id}] Sending approve message to client with user id...");
 
                         var infoMessageToClient = new ChatMessage()
                         {
-                            Command = ChatCommand.RegisterApproved,
                             Content = id
                         };
 
@@ -82,7 +83,7 @@ namespace MP.Chat.Server
                         pipeServer.Disconnect();
                     }
 
-                    if (chatMessage.Command == ChatCommand.GetMessagesStory)
+                    if (chatMessage.Command == ChatCommand.GetMessagesHistory)
                     {
                         _logger.Info($"[{chatMessage.Name}] 'GetMessagesStory' command received");
 
@@ -90,7 +91,7 @@ namespace MP.Chat.Server
 
                         var infoMessageToClient = new ChatMessage()
                         {
-                            Command = ChatCommand.GetMessagesStory,
+                            Command = ChatCommand.GetMessagesHistory,
                             Content = JsonConvert.SerializeObject(_messageStore.Messages)
                         };
 
@@ -112,6 +113,6 @@ namespace MP.Chat.Server
             }
         }
 
-     
+
     }
 }

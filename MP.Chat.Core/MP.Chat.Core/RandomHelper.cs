@@ -45,7 +45,7 @@ namespace MP.Chat.Core
 
         public static int GetRandomSleepTime()
         {
-            var time = RandomHelper.Random.Next(2, 12) * 1000;
+            var time = RandomHelper.Random.Next(2, 12) * 10;
 
             return time;
         }

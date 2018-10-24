@@ -51,5 +51,12 @@ namespace MP.Chat.Core
             ioStream.Write(outBuffer, 0, len);
             ioStream.Flush();
         }
+
+        public List<ChatMessage> GetMessagesStory(ChatMessage message)
+        {
+            var store = JsonConvert.DeserializeObject<List<ChatMessage>>(message.Content);
+
+            return store;
+        }
     }
 }

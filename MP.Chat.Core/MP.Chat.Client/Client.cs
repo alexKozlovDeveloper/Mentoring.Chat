@@ -14,16 +14,22 @@ namespace MP.Chat.Client
 {
     public class Client
     {
-        public string Name { get; private set; }
+        public bool IsAlive { get; set; }
 
-        public string _id;
+        public string Name { get; private set; }
+        public string Id { get; private set; }
 
         private Thread _sendMessageThread;
         private Thread _receiveMessageThread;
 
+        private Thread _loginThread;
+
         private Logger _logger;
 
         private ConsoleViewer _consoleViewer;
+
+        private NamedPipeClientStream _messagesFromServer;
+        private NamedPipeClientStream _messagesToServer;
 
         public Client(Logger logger)
         {
@@ -32,41 +38,35 @@ namespace MP.Chat.Client
             _consoleViewer = new ConsoleViewer(logger);
 
             Name = RandomHelper.GetRandomName();
-            _logger.Info($"Name '{Name}' generated");
+            _logger.Info($"Name '{Name}' generated");           
         }
 
-        public void ConnectToServer()
+        public bool Login()
         {
-            _logger.Info("Creating pipe for init user on server...");
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName, 
-                PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+            //IsAlive = true;
 
-            _logger.Info("Connecting to server...");
-            pipeClient.Connect();
+            //_loginThread = new Thread(Login);
+            //_loginThread.Start();
 
-            StreamController streamController = new StreamController(pipeClient);
+            LoginUser();
 
-            var messege = new ChatMessage()
+            var history = GetMessagesHistory();
+
+            foreach (var item in history)
             {
-                Command = ChatCommand.RegisterUser,
-                Name = Name
-            };
-
-            _logger.Info("Sending registering message");
-            streamController.SendMessage(messege);
-
-            var response = streamController.ReceiveMessage();
-
-            if(response.Command == ChatCommand.RegisterApproved)
-            {
-                _logger.Info("Register approved");
+                _consoleViewer.WriteMessageToConsole(item);
             }
 
-            pipeClient.Close();
+            return true;
+        }
 
-            _id = response.Content;
-            _logger.Info($"Client Id '{_id}'");
+        private void Start()
+        {
+            CreateThreads();
+        }
 
+        private void CreateThreads()
+        {
             _logger.Info($"Creating threads for Send/Receive funcs...");
             _logger.Info($"Starting SendMessageFunc");
             _sendMessageThread = new Thread(SendMessageFunc);
@@ -75,72 +75,215 @@ namespace MP.Chat.Client
             _logger.Info($"Starting ReceiveMessageFunc");
             _receiveMessageThread = new Thread(ReceiveMessageFunc);
             _receiveMessageThread.Start();
+        }
 
+        public void SendMessage()
+        {
+
+        }
+
+        private void LoginUser()
+        {
+            //_logger.Info("Creating pipe...");
+            //var pipe = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName,
+            //    PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+
+            //_logger.Info("Connecting to server...");
+            //pipe.Connect();
+
+            var pipe = ConnectToServer();
+
+            StreamController streamController = new StreamController(pipe);
+
+            var messege = new ChatMessage()
+            {
+                Command = ChatCommand.Login,
+                Name = Name
+            };
+
+            _logger.Info("Try to login...");
+            streamController.SendMessage(messege);
+
+            var response = streamController.ReceiveMessage();
+
+            _logger.Info("Login success");
+            Id = response.Content;
+            _logger.Info($"Client Id '{Id}'");
+
+            pipe.Dispose();
+        }
+
+        private NamedPipeClientStream ConnectToServer()
+        {
+            _logger.Info("Creating pipe...");
+            var pipe = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName,
+                PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+
+            _logger.Info("Connecting to server...");
+
+            while (IsAlive)
+            {
+                try
+                {
+                    pipe.Connect(500);
+                }
+                catch (TimeoutException ex)
+                {
+                    _logger.Info($"Server is offline");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
+            }
+
+            _logger.Info("Connected");
+
+            return pipe;
+        }
+
+        private List<ChatMessage> GetMessagesHistory()
+        {
+            //_logger.Info("Creating pipe...");
+            //var pipe = new NamedPipeClientStream(Constant.ServerName, Constant.ServerListeningPipeName,
+            //    PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);
+
+            //_logger.Info("Connecting to server...");
+            //pipe.Connect();
+
+            var pipe = ConnectToServer();
+
+            StreamController streamController = new StreamController(pipe);
+
+            var messege = new ChatMessage()
+            {
+                Command = ChatCommand.GetMessagesHistory,
+                Name = Name
+            };
+
+            _logger.Info("Sending request for old messages...");
+            streamController.SendMessage(messege);
+
+            var response = streamController.ReceiveMessage();
+
+            var result = streamController.GetMessagesStory(response);
+
+            pipe.Dispose();
+
+            return result;
         }
 
         public void SendMessageFunc()
         {
             _logger.Info($"SendMessageFunc start.");
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesFromUserPipeName(_id), 
+            _messagesToServer = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesFromUserPipeName(Id),
                 PipeDirection.Out, PipeOptions.None, TokenImpersonationLevel.Impersonation);
 
             _logger.Info("Connecting to GetMessagesFromUserPipeName...");
-            pipeClient.Connect();
+            _messagesToServer.Connect();
             _logger.Info("Connected");
-            
-            StreamController streamController = new StreamController(pipeClient);
 
-            while (true)
+            StreamController streamController = new StreamController(_messagesToServer);
+
+            while (IsAlive)
             {
                 var messege = new ChatMessage()
                 {
-                    Command = ChatCommand.Message,
+                    Command = ChatCommand.AddMessage,
                     Content = RandomHelper.GetRandomStoryes(),
                     Name = Name,
-                    Id = _id
+                    Id = Id
                 };
 
-                _logger.Info("Sending random story to server");
+                try
+                {
+                    _logger.Info("Sending random story to server");
 
-                streamController.SendMessage(messege);
+                    streamController.SendMessage(messege);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
 
-                _logger.Info("Sleeping...");
-                Thread.Sleep(100000);
-                //Thread.Sleep(RandomHelper.GetRandomSleepTime());
+                Sleep(RandomHelper.GetRandomSleepTime());
             }
 
             _logger.Info($"SendMessageFunc end.");
+        }
+
+        private void Sleep(int time)
+        {
+            _logger.Info($"Sleeping '{time}'...");
+
+            for (int i = 0; i < time; i++)
+            {
+                if (IsAlive == false)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
+            }
         }
 
         public void ReceiveMessageFunc()
         {
             _logger.Info($"ReceiveMessageFunc start.");
 
-            var pipeClient = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesToUserPipeName(_id), 
+            _messagesFromServer = new NamedPipeClientStream(Constant.ServerName, PipeNameHelper.GetMessagesToUserPipeName(Id),
                 PipeDirection.In, PipeOptions.None, TokenImpersonationLevel.Impersonation);
 
             _logger.Info("Connecting to server...");
-            pipeClient.Connect();
+            _messagesFromServer.Connect();
             _logger.Info("Connected");
 
-            StreamController streamController = new StreamController(pipeClient);
+            StreamController streamController = new StreamController(_messagesFromServer);
 
-            while (true)
+            while (IsAlive)
             {
-                _logger.Info("Waiting message from server...");
-                var messege = streamController.ReceiveMessage();
+                try
+                {
+                    _logger.Info("Waiting message from server...");
+                    var messege = streamController.ReceiveMessage();
 
-                _logger.Info("Message received...");
+                    _logger.Info("Message received...");
 
-                _logger.Info(messege.Content);
+                    _consoleViewer.WriteMessageToConsole(messege);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
             }
 
             _logger.Info($"ReceiveMessageFunc end.");
         }
 
-        public void StopChatting()
+        public void Stop()
         {
+            _logger.Info($"Starting shut down...");
 
+            IsAlive = false;
+
+            try
+            {
+                if(_messagesFromServer != null)
+                {
+                    _logger.Info($"messagesFromServer disposing...");
+                    _messagesFromServer.Dispose();
+                }
+
+                if(_messagesToServer != null)
+                {
+                    _logger.Info($"messagesToServer disposing...");
+                    _messagesToServer.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
         }
     }
 }

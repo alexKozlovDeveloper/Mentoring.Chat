@@ -32,7 +32,7 @@ namespace MP.Chat.Core
 
         public void WriteMessageToConsole(ChatMessage message)
         {
-            WriteMessageToConsole(message, ConsoleColor.Green);
+            WriteMessageToConsole(message, ConsoleColor.White);
         }
 
         private string GetStringMessage(ChatMessage message)

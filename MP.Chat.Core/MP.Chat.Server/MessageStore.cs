@@ -17,6 +17,8 @@ namespace MP.Chat.Server
 
         private Logger _logger;
 
+        private string _lock = "MessageStoreLock";
+
         public MessageStore(Logger logger)
         {
             _logger = logger;
@@ -26,9 +28,11 @@ namespace MP.Chat.Server
 
         public void AddNewMessage(ChatMessage message)
         {
-            Messages.Add(message);
-
-            NewMessage(message);
+            lock (_lock)
+            {
+                Messages.Add(message);
+                NewMessage(message);
+            }           
         }
     }
 }

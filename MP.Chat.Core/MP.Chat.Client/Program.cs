@@ -20,12 +20,7 @@ namespace MP.Chat.Client
             var botCreator = new BotCreator(logger);
 
             logger.Info("Start Bot Chatting...");
-            botCreator.StartBotChatting();
-
-            //var botCreator2 = new BotCreator();
-
-            //Console.WriteLine("Start Bot2 Chatting...");
-            //botCreator2.StartBotChatting();
+            botCreator.StartBot();
 
             while (true)
             {
@@ -34,7 +29,7 @@ namespace MP.Chat.Client
 
                 if (key.Key == ConsoleKey.Escape)
                 {
-                    botCreator.StopBotChatting();
+                    botCreator.StopBot();
                     break;
                 }
             }

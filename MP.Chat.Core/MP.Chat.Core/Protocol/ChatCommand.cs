@@ -8,9 +8,9 @@ namespace MP.Chat.Core.Protocol
 {
     public enum ChatCommand
     {
-        Message,
-        RegisterUser,
-        RegisterApproved,
-        GetMessagesStory
+        AddMessage,
+        Login,
+        GetMessagesHistory,
+        Logout
     }
 }

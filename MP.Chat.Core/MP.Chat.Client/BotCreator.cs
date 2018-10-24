@@ -20,7 +20,7 @@ namespace MP.Chat.Client
             _logger = logger;
         }
 
-        public void StartBotChatting()
+        public void StartBot()
         {
             _botCreatorThread = new Thread(BotCreatorThreadFunc);
 
@@ -33,14 +33,35 @@ namespace MP.Chat.Client
         {
             while (_isThreadActive)
             {
+                _logger.Info("Creating new client...");
                 var client = new Client(_logger);
 
-                client.ConnectToServer();
+                _logger.Info("Starting client...");
+                client.Login();
 
-            }       
+                Sleep(RandomHelper.GetRandomSleepTime());
+
+                _logger.Info("Stopping client...");
+                client.Stop();
+            }
         }
 
-        public void StopBotChatting()
+        private void Sleep(int time)
+        {
+            _logger.Info($"Sleeping '{time}'...");
+
+            for (int i = 0; i < time; i++)
+            {
+                if (_isThreadActive == false)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        public void StopBot()
         {
             _isThreadActive = false;
         }
