@@ -13,7 +13,7 @@ namespace MP.Chat.Client
     {
         static void Main(string[] args)
         {
-            var logger = new Logger(@"log.txt", false);
+            var logger = new Logger(@"log.txt");
             logger.Info("Start.");
 
             logger.Info("Creating bot...");

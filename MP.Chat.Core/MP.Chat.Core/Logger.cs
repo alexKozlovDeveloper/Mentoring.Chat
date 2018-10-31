@@ -24,34 +24,39 @@ namespace MP.Chat.Core
         public void Info(string message)
         {
             LogToFile($"Info: '{message}'");
+            LogToConsole($"Info: '{message}'", ConsoleColor.Green);
         }
 
         public void Error(string message)
         {
             LogToFile($"ERROR! '{message}'");
+            LogToConsole($"ERROR! '{message}'", ConsoleColor.Red);
         }
 
         public void Error(Exception ex)
         {
-            var oldColor = Console.ForegroundColor;
-
-            Console.ForegroundColor = ConsoleColor.Red;
-
             Error(ex.Message);
+        }
 
-            Console.ForegroundColor = oldColor;      
+        private void LogToConsole(string message, ConsoleColor color)
+        {
+            if (_writeToConsole == true)
+            {
+                var oldColor = Console.ForegroundColor;
+
+                Console.ForegroundColor = color;
+
+                Console.WriteLine(message);
+
+                Console.ForegroundColor = oldColor;
+            }
         }
 
         private void LogToFile(string message)
         {
             lock(_lock)
             {
-                var str = $"{DateTime.Now.ToString("hh:mm:ss.ffff")} {message}";
-
-                if(_writeToConsole == true)
-                {
-                    Console.WriteLine(str);
-                }
+                var str = $"{DateTime.Now.ToString("hh:mm:ss.ffff")} {message}";                
 
                 str += Environment.NewLine;
 

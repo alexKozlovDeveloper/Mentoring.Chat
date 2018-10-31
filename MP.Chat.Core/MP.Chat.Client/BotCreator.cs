@@ -56,7 +56,7 @@ namespace MP.Chat.Client
                     client.SendMessage(RandomHelper.GetRandomGreetingMessages());
                     Sleep(RandomHelper.GetRandomSleepTime());
 
-                    var count = RandomHelper.Random.Next(10, 50);
+                    var count = RandomHelper.Random.Next(1, 2);
 
                     for (int i = 0; i < count; i++)
                     {

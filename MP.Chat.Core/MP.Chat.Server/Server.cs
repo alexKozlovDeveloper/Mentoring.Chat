@@ -128,6 +128,7 @@ namespace MP.Chat.Server
 
                     foreach (var item in disconnectedClients)
                     {
+                        item.Stop();
                         _clientHandlers.Remove(item);
                         messages.Add(new ChatMessage("Server", $"Client '{item.ClientName}' has been disconnected"));                        
                     }
